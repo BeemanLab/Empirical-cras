@@ -228,6 +228,8 @@ var ServerHelper = {
     upload_data: function (event_type, response_log) {            // start the upload process by requesting the form to get the csrf token
         // stringify response log
         console.log(this.sessionToken);
+        console.log(response_log);
+        console.log("aldsjkfal;ksjd");
         var data = "";
         for (var i = 0; i < response_log.length; i++) {
             data = data + response_log[i] + "\n";
