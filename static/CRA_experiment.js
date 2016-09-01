@@ -1,5 +1,5 @@
 function start_CRA_experiment(cfg) {
-
+	console.log('imagesOfImages exp', imagesOfImages);
 	console.log('cfg', cfg);
 
 	var canvas = document.getElementById("canvas");
@@ -57,6 +57,20 @@ function start_CRA_experiment(cfg) {
 		"IorA": "  "
 		//"subj": params['workerId']
 	};
+
+	var responseImages = {
+		"blockNum": 0,
+		"trialNum": 0,
+		"readyRT": 0,
+		"img": "  ",
+		"craRT": 0,
+		"solutionRT": 0,
+		"craSolution": "NA",
+		"IorART": 0,
+		"IorA": "  "
+		//"subj": params['workerId']
+	};
+
 
 	response_log.push('Lead Investigator: Test');
 	response_log.push('IRB protocol #STU...');
@@ -125,6 +139,13 @@ function start_CRA_experiment(cfg) {
 				// 	return 'navigation message'
 				// }
 			}
+		}
+
+		function show_picture (image_name) {
+			var x = WIDTH/2.0 - imagesOfImages[image_name].width/2.0;
+			var y = HEIGHT/ 2.0 - imagesOfImages[image_name].height/2.0;
+			console.log('images wtf', typeof(imagesOfImages[image_name]));
+			ctx.drawImage(imagesOfImages[image_name], x,y);
 		}
 
 		var fsm = StateMachine.create({
@@ -299,14 +320,22 @@ function start_CRA_experiment(cfg) {
 
 					if (realProblem) {
 
-						ctx.fillText(cfg.problems[trialNum - 1].firstWord + " "
-							+ cfg.problems[trialNum - 1].secondWord + " "
-							+ cfg.problems[trialNum - 1].thirdWord
-							, WIDTH / 2, HEIGHT / 2);
+						//IMAGES
+						show_picture(trialNum-1); // -1 so it starts at 0th item in array
+						console.log('cfg.images[trialNum-1]', cfg.images[trialNum-1]);
+						responseImages.img = cfg.images[trialNum-1];
+						console.log('responseImages', responseImages);
 
-						response.word1 = cfg.problems[trialNum - 1].firstWord;
-						response.word2 = cfg.problems[trialNum - 1].secondWord;
-						response.word3 = cfg.problems[trialNum - 1].thirdWord;
+
+						//WORDS
+						//ctx.fillText(cfg.problems[trialNum - 1].firstWord + " "
+						//	+ cfg.problems[trialNum - 1].secondWord + " "
+						//	+ cfg.problems[trialNum - 1].thirdWord
+						//	, WIDTH / 2, HEIGHT / 2);
+                        //
+						//response.word1 = cfg.problems[trialNum - 1].firstWord;
+						//response.word2 = cfg.problems[trialNum - 1].secondWord;
+						//response.word3 = cfg.problems[trialNum - 1].thirdWord;
 					}
 					else { //AMComeback
 						ctx.fillText(cfg.practice[practiceNum - 1].firstWord + " "
@@ -442,22 +471,10 @@ function start_CRA_experiment(cfg) {
 						blockNum++;
 						realProblem = 1;
 					}
+
 					//error handling - too many solution NAs
 					//boot if taking too long
 					var currTime = performance.now();
-					var problemsVar = cfg.problems;
-					console.log('problemsVar', problemsVar);
-
-					//console.log("cfg.problems.length", cfg.problems.length);
-
-					//var dog = "cfg.problems";
-					//console.log('array', (cfg.problems[0]).length);
-					//console.log('dog.length', dog.length);
-					//console.log("var problems", dog.count());
-					////console.log("cfg.problems", cfg.problems);
-					//console.log("cfg.problems.length", cfg.problems.size());
-					//console.log("cfg.problems.length", cfg.problems.length);
-
 					if ((currTime - masterClockStart) >= cfg.specs.boot_time) {
 						console.log('currTime', currTime);
 						fsm.onend();
@@ -469,11 +486,11 @@ function start_CRA_experiment(cfg) {
 					else if (realProblem == 1) {
 						fsm.onpracticeInstructions();
 					}
-					else if (trialNum == (Math.floor(problemsVar.length / 2))) {
+					else if (trialNum == (Math.floor(cfg.problems.length / 2))) {
 						blockNum++;
 						fsm.onbreak();
 					}
-					else if (trialNum < problemsVar.length) {
+					else if (trialNum < cfg.problems.length) {
 						fsm.onready();
 					}
 					else {

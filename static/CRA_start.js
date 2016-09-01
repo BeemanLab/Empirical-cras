@@ -1,3 +1,5 @@
+var imagesOfImages = []; //this is the array we put actual images (not strings) into #willtherealimagepleasestandup
+
 function main() {
     var consent_form = {};
     // extract session token from url
@@ -11,15 +13,118 @@ function main() {
     var canvas_properties = '<canvas id="mainWin" width="600" height="600"></canvas>';
     var trialCount = 0;
 
+    //parse myConfig
+    var cfg;
+
 
     params = ServerHelper.empirical_start(url);
     console.log(params);
     //cfg = ServerHelper.start_request(params.group);
-    var cfg = {"specs": {"CRA_timeout":3000,"sol_timeout" : 6000, "iora_timeout" : 3000, "NAcount_sol_max": 3,"NAcount_prob_max": 4, "boot_time": 120000, "upload": 0},"instrux":{"slide1":"In this experiment, you will see three words presented on the screen. For each problem you are asked to come up with a solution word that could be combined with each of the three problem words to form a common compound or phrase. \n The solution word can precede or follow the problem word. For example, what word can go with \npine \ncrab \nsauce \n\nPress space bar to continue.","slide2" : "pine apple \ncrab apple \napple sauce \n\nPress space bar to continue","slide3":"You will also decide whether the solution was reached with insight or with analysis \nInsight:\n- sudden & surprising\n- confidence; you 'just know' solution works with all 3 problem words\n- may be unable to articulate how you reached the solution\n-  Aha! moment \nAnalysis:\n- gradually approach solution\n- part by part solution \n- may use deliberate strategy\n- might be able to report steps \n\nPress space bar to continue","slide4":"No solution type is better or worse than the other; there are no right or wrong answers in reporting insight or analysis. \nYou will not be able to solve every problem, and that is OK. \n\nPress space bar to continue","slide5":"Press spacebar when you are ready to start the practice problems.","slide6":"Now the experiment will begin.\nPress enter to begin"},"error_handling":{"upload":0},"practice":[{"firstWord":"practice1","secondWord":"practice2","thirdWord":"practice3"},{"firstWord":"practice1","secondWord":"practice2","thirdWord":"practice3"}],"problems":[{"firstWord":"pine","secondWord":"crab","thirdWord":"sauce"},{"firstWord":"cane","secondWord":"daddy","thirdWord":"plum"},{"firstWord":"fox","secondWord":"man","thirdWord":"peep"},{"firstWord":"worm","secondWord":"shelf","thirdWord":"end"},{"firstWord":"puppy","secondWord":"true","thirdWord":"letter"}]};
+
+    //var cfg = {"specs": {"CRA_timeout":3000,"sol_timeout" : 6000, "iora_timeout" : 3000, "NAcount_sol_max": 3,"NAcount_prob_max": 4, "boot_time": 120000, "upload": 0},"instrux":{"slide1":"In this experiment, you will see three words presented on the screen. For each problem you are asked to come up with a solution word that could be combined with each of the three problem words to form a common compound or phrase. \n The solution word can precede or follow the problem word. For example, what word can go with \npine \ncrab \nsauce \n\nPress space bar to continue.","slide2" : "pine apple \ncrab apple \napple sauce \n\nPress space bar to continue","slide3":"You will also decide whether the solution was reached with insight or with analysis \nInsight:\n- sudden & surprising\n- confidence; you 'just know' solution works with all 3 problem words\n- may be unable to articulate how you reached the solution\n-  Aha! moment \nAnalysis:\n- gradually approach solution\n- part by part solution \n- may use deliberate strategy\n- might be able to report steps \n\nPress space bar to continue","slide4":"No solution type is better or worse than the other; there are no right or wrong answers in reporting insight or analysis. \nYou will not be able to solve every problem, and that is OK. \n\nPress space bar to continue","slide5":"Press spacebar when you are ready to start the practice problems.","slide6":"Now the experiment will begin.\nPress enter to begin"},"error_handling":{"upload":0},"practice":[{"firstWord":"practice1","secondWord":"practice2","thirdWord":"practice3"},{"firstWord":"practice1","secondWord":"practice2","thirdWord":"practice3"}],"problems":[{"firstWord":"pine","secondWord":"crab","thirdWord":"sauce"},{"firstWord":"cane","secondWord":"daddy","thirdWord":"plum"},{"firstWord":"fox","secondWord":"man","thirdWord":"peep"},{"firstWord":"worm","secondWord":"shelf","thirdWord":"end"},{"firstWord":"puppy","secondWord":"true","thirdWord":"letter"}]};
+
+    var cfg = {
+      "specs": {
+        "CRA_timeout" : 3000,
+        "sol_timeout" : 6000,
+        "iora_timeout" : 3000,
+        "NAcount_sol_max": 3,
+        "NAcount_prob_max": 4,
+        "boot_time": 120000,
+        "upload": 0
+       },
+
+      "instrux":{
+            "slide1" : "In this experiment, you will see three words presented on the screen. For each problem you are asked to come up with a solution word that could be combined with each of the three problem words to form a common compound or phrase. \n The solution word can precede or follow the problem word. For example, what word can go with \npine \ncrab \nsauce \n\nPress space bar to continue.",
+            "slide2" : "pine apple \ncrab apple \napple sauce \n\nPress space bar to continue",
+            "slide3" : "You will also decide whether the solution was reached with insight or with analysis \nInsight:\n- sudden & surprising\n- confidence; you 'just know' solution works with all 3 problem words\n- may be unable to articulate how you reached the solution\n-  Aha! moment \nAnalysis:\n- gradually approach solution\n- part by part solution \n- may use deliberate strategy\n- might be able to report steps \n\nPress space bar to continue",
+            "slide4" : "No solution type is better or worse than the other; there are no right or wrong answers in reporting insight or analysis. \nYou will not be able to solve every problem, and that is OK. \n\nPress space bar to continue",
+            "slide5" : "Press spacebar when you are ready to start the practice problems.",
+            "slide6" : "Now the experiment will begin.\nPress enter to begin"
+        },
+
+
+        "error_handling":{
+            "upload" : 0
+        },
+
+
+        "practice":[{
+            "firstWord":"practice1",
+            "secondWord":"practice2",
+            "thirdWord" : "practice3"
+        },
+        {
+            "firstWord":"practice1",
+            "secondWord":"practice2",
+            "thirdWord" : "practice3"
+        }],
+
+
+        "problems":[{
+            "firstWord":"pine",
+            "secondWord":"crab",
+            "thirdWord" : "sauce"
+        },
+        {
+            "firstWord":"cane",
+            "secondWord":"daddy",
+            "thirdWord" : "plum"
+        },
+        {
+            "firstWord":"fox",
+            "secondWord":"man",
+            "thirdWord" : "peep"
+        },
+        {
+            "firstWord":"worm",
+            "secondWord":"shelf",
+            "thirdWord" : "end"
+        },
+        {
+            "firstWord":"puppy",
+            "secondWord":"true",
+            "thirdWord" : "letter"
+        }],
+
+
+        "images": [
+            'Image_10002_2.jpg', 'Image_10008_4.jpg', 'Image_10014_4.jpg', 'Image_10016_1.jpg', 'Image_10034_2.jpg'
+        ]
+    };
+
 
     // show_consent() using the cfg.consent_form
 
+    function preload_images() {
+        console.log('called preload_images');
+
+        for (var i=0; i<cfg.images.length; i++){
+            var im = new Image();
+            im.src = ServerHelper.image_url + 'lud-img2/' + cfg.images[i];
+            console.log('im', im);
+            imagesOfImages.push(im);
+        }
+        console.log('imagesOfImages', imagesOfImages);
+    }
+    preload_images();
+    console.log('imagesOfImages start', imagesOfImages);
     start_CRA_experiment(cfg);
+
+    //function parse_config(myConfig) {
+    //    var parts = myConfig.split('\n');
+    //    var dictionary = {};
+    //   console.log('parts 1', parts);
+    //
+    //    for(var i = 0; i < parts.length; i++){
+    //        var p = parts[i];
+    //        console.log('parts 2', parts);
+    //    }
+    //
+    //}
+    //parse_config(ServerHelper.config_file);
+
+
 }
     // //if you do not have a session token, you get sent to a demo.
     // if (params.hasOwnProperty('assignmentId') && params["assignmentId"].match("ASSIGNMENT_ID_NOT_AVAILABLE")) {
