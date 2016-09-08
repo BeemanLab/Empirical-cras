@@ -2,24 +2,33 @@
  * Created by PJR on 8/5/2015.
  */
 
-var DEVELOPMENT_SERVER=true;
+// var DEVELOPMENT_SERVER=true;
 //var LIVE_MTURK='https://www.mturk.com/mturk/externalSubmit';
 //var SANDBOX_MTURK='https://workersandbox.mturk.com/mturk/externalSubmit';
+
+// https://www.reberlab.org/static/SISL.html?group=de945007aec0184d&assignmentId=123RVWYBAZW00EXAMPLE456RVWYBAZW00EXAMPLE&hitId=123RVWYBAZW00EXAMPLE&turkSubmitTo=https://www.mturk.com/&workerId=AZ3456EXAMPLE
+
 
 var server_debug = true;
 
 var ServerHelper = {
-    server_url: (DEVELOPMENT_SERVER) ? "http://127.0.0.1:8000/exp/" : "https://www.reberlab.org/exp/",
-    image_url: (DEVELOPMENT_SERVER) ? "http://127.0.0.1:8000/images/" : "https://www.reberlab.org/images/",
+    server_url: '', // (DEVELOPMENT_SERVER) ? "http://127.0.0.1:8000/exp/" : "https://www.reberlab.org/exp/",
+    image_url: '', //(DEVELOPMENT_SERVER) ? "http://127.0.0.1:8000/images/" : "https://www.reberlab.org/images/",
     xmlhttp: new XMLHttpRequest(),
+    groupToken: '',
     sessionToken: "",
     config_file: "",
     consent_form: "",
     workerId: "",
+    prompt_string: "Please enter your User ID:",
     fatal_error: false,
     error: "",
     response_log: "",
     status: "",
+    demo_mode: false,
+    mturk: false,
+    mturk_submit: '',
+    mturk_info: '',
     //group_session_num: "",
     //config_error: false,
     //group_session_requested: false,
@@ -28,18 +37,23 @@ var ServerHelper = {
     //config_received: false,
     //consent_requested: false,
     //consent_received: false,
-    upload_requested: false,
     start_requested: false,
     start_received: false,
     data_logged: false,
+    upload_requested: false,
     upload_in_progress: false,
     upload_queue: [],
     upload_connection_log: '',
-    groupToken: '', // these just used for logging here
 
     empirical_start: function(url) {
         var params={};
         var q=url.split('?');
+        u = new URL(url);
+        if (u.port=='' || u.port==80) host=u.hostname;
+        else host=u.hostname+':'+u.port
+        this.server_url = u.protocol + '//' + host +'/exp/';
+        this.image_url = u.protocol + '//' + host + '/images/';
+        console.log(this.server_url);
         if (q.length<2) return(params);
         q = q[1].split('&');
         for(var i=0;i < q.length;i++) {
@@ -54,21 +68,49 @@ var ServerHelper = {
             this.error="No group token in URL";
             this.fatal_error=true;
         }
-        if (params.hasOwnProperty('workerId')) {
-            this.workerId = params['workerId'];
+        if (params.hasOwnProperty('workerId')) this.workerId = params['workerId'];
+        else this.workerId='';
+        if (this.workerId=='demo' || params.hasOwnProperty('demo')) this.demo_mode=true;
+        else if (this.workerId=='prompt' || params.hasOwnProperty('prompt')) {  // can't prompt if demo mode
+            console.log("Getting workerID");
+            // prompt for name/sona id
+            workerId = prompt(ServerHelper.prompt_string);
+            name_ok = /^[a-z0-9_]+$/i.test(workerId);
+            while (!name_ok) {
+                workerId = prompt("User id can only have numbers, letters or underscore:");
+                name_ok = /^[a-z0-9_]+$/i.test(workerId);
+            }
         }
+        if (params.hasOwnProperty('assignmentId')) { // this is an mturk session
+            this.mturk=true;
+            if (params['assignmentId']=='ASSIGNMENT_ID_NOT_AVAILABLE') {
+                this.demo_mode=true;
+            } else {
+                var mturk_info="assignmentId=" + params['assignmentId'] + "\n";
+                if (params.hasOwnProperty('hitId')) mturk_info+="hitId=" + params['hitId'] + "\n";
+                mturk_info+="workerId=" + this.workerId + "\n";
+                if (params.hasOwnProperty('turkSubmitTo')) mturk_info+="turkSubmitTo=" + params['turkSubmitTo'] + "\n";
+                this.mturk_submit=params['turkSubmitTo'];
+                this.mturk_info=mturk_info;
+                console.log(mturk_info);
+            }
+        }
+        console.log("Start: "+this.groupToken+' '+this.workerId);
         return(params);
     },
 
-    start_request: function(groupToken, workerId) {
+    start_request: function() {
         if (this.start_requested) {
             if (server_debug) console.log("Multiple calls to start_request");
             return;
         }
-        console.log(groupToken, workerId);
-        this.groupToken = groupToken;
-        this.workerId = workerId;
-        if (workerId=='') {
+        //console.log(this.groupToken, this.workerId);
+        //this.groupToken = groupToken;
+        //this.workerId = workerId;
+        if (this.demo_mode) {
+            start_request_url = this.server_url + 'start/' + this.groupToken + '/demo';
+        }
+        else if (this.workerId=='') {
             var start_request_url = this.server_url + 'start/' + this.groupToken;
             console.log('no workerId');
             console.log(start_request_url);
@@ -96,10 +138,11 @@ var ServerHelper = {
                 xmlDoc = parser.parseFromString(response,"text/xml");
                 console.log("text: "+response.slice(0,200));
                 // the response is an XML object with the session token, workerid,  config file and consent form
-                ServerHelper.sessionToken = xmlDoc.getElementsByTagName("Empirical:session")[0].childNodes[0].nodeValue;
-                ServerHelper.workerId = xmlDoc.getElementsByTagName("Empirical:workerid")[0].childNodes[0].nodeValue;
-                ServerHelper.config_file = xmlDoc.getElementsByTagName("Empirical:config")[0].childNodes[0].nodeValue;
-                ServerHelper.consent_form = xmlDoc.getElementsByTagName("Empirical:consent")[0].childNodes[0].nodeValue;
+                ServerHelper.sessionToken = xmlDoc.getElementsByTagNameNS("https://www.reberlab.org/","session")[0].childNodes[0].nodeValue;
+                console.log("session "+ ServerHelper.sessionToken);
+                ServerHelper.workerId = xmlDoc.getElementsByTagNameNS("https://www.reberlab.org/","workerid")[0].childNodes[0].nodeValue;
+                ServerHelper.config_file = xmlDoc.getElementsByTagNameNS("https://www.reberlab.org/","config")[0].childNodes[0].nodeValue;
+                ServerHelper.consent_form = xmlDoc.getElementsByTagNameNS("https://www.reberlab.org/","consent")[0].childNodes[0].nodeValue;
                 console.log("session "+ ServerHelper.sessionToken);
                 console.log("worker "+ServerHelper.workerId);
                 console.log("config "+ServerHelper.config_file.slice(0,200));
@@ -205,9 +248,8 @@ var ServerHelper = {
     },
 */
 
-    request_status: function (sessionToken) {
-        if (!this.sessionToken) this.sessionToken = sessionToken; // only use passed parameter if not already set
-        var url = this.server_url + 'status/' + this.sessionToken;
+    request_status: function () {
+        var url = this.server_url + 'status/' + this.sessionToken + '/' + this.workerId;
         this.xmlhttp = new XMLHttpRequest();
         this.xmlhttp.addEventListener('load', this.get_status);
         this.xmlhttp.open("GET", url, true);
@@ -227,9 +269,6 @@ var ServerHelper = {
 
     upload_data: function (event_type, response_log) {            // start the upload process by requesting the form to get the csrf token
         // stringify response log
-        console.log(this.sessionToken);
-        console.log(response_log);
-        console.log("aldsjkfal;ksjd");
         var data = "";
         for (var i = 0; i < response_log.length; i++) {
             data = data + response_log[i] + "\n";
@@ -309,12 +348,15 @@ var ServerHelper = {
     },
 
     // Create form to submit the final data to mturk
-    upload_to_mturk: function(mturk_url, summary) {
-        var url = decodeURIComponent(mturk_url) + '/mturk/externalSubmit'; // this is supposed to be constructed from URL params...
+    upload_to_mturk: function(summary) {
+        var url = decodeURIComponent(ServerHelper.mturk_submit) + '/mturk/externalSubmit'; // this is supposed to be constructed from URL params...
+
+        // this was assembled initially but not uploaded until the end
+        this.upload_data('private',this.mturk_info);
+
         var form_holder = document.getElementById("formholder");
         if(server_debug) console.log("setting form");
         var mturk_response=summary+';sesssionToken='+this.sessionToken+';groupToken='+this.groupToken+';connection_log='+ServerHelper.upload_connection_log;
-
         var formString = "<form action=\"" + url + "\" method=\"post\"><input type=\"hidden\" name=\"assignmentId\" value=\"" + cfg['assignmentId'] +
             "\">Press Submit to finish this experiment <input type=\"hidden\" name=\"dataLog\" value=\"" + mturk_response + "\"> <input type=\"submit\" value=\"Submit\"></form>";
         if(server_debug) console.log(formString);
@@ -360,6 +402,3 @@ var ServerHelper = {
     }*/
 
 };
-
-
-

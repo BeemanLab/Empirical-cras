@@ -103,6 +103,15 @@ function start_CRA_experiment(cfg) {
 	//ServerHelper.sessionToken = 'f80bbd367012e8fa'; // DELETE!
 	//ServerHelper.upload_data("initial", response_log); // Delete
 
+	function message(lines) {
+       ctx.font = "24px Arial";
+       ctx.fillStyle='black';
+       ctx.textAlign="center";
+       for (var i=0; i<lines.length; i++) {
+           ctx.fillText(lines[i], canvas.width/2, 165+(i*28));
+       }
+   }
+
 	function initiateExperiment() {
 
 		window.onbeforeunload = warn_termination;
@@ -265,7 +274,6 @@ function start_CRA_experiment(cfg) {
 							response.craSolution = " ";
 							response.IorART = " ";
 							response.IorA = "NA";
-
 							NAcount_prob++;
 							console.log('problems', cfg.problems.length);
 							fsm.onmoveToNext();
@@ -276,10 +284,14 @@ function start_CRA_experiment(cfg) {
 					var problemTimer = performance.now();
 
 					if (practice) {
-						ctx.fillText(cfg.practice[practiceNum - 1].firstWord + " "
-							+ cfg.practice[practiceNum - 1].secondWord + " "
-							+ cfg.practice[practiceNum - 1].thirdWord
-							, WIDTH / 2, HEIGHT / 2);
+						message([cfg.practice[practiceNum - 1].firstWord,
+							cfg.practice[practiceNum - 1].secondWord,
+							cfg.practice[practiceNum - 1].thirdWord]);
+
+						//ctx.fillText(cfg.practice[practiceNum - 1].firstWord + " "
+						//	+ cfg.practice[practiceNum - 1].secondWord + " "
+						//	+ cfg.practice[practiceNum - 1].thirdWord
+						//	, WIDTH / 2, HEIGHT / 2);
 
 						response.word1 = cfg.practice[practiceNum - 1].firstWord;
 						response.word2 = cfg.practice[practiceNum - 1].secondWord;
@@ -328,14 +340,18 @@ function start_CRA_experiment(cfg) {
 
 
 						//WORDS
+						message([cfg.problems[trialNum - 1].firstWord,
+							cfg.problems[trialNum - 1].secondWord,
+							cfg.problems[trialNum - 1].thirdWord]);
+
 						//ctx.fillText(cfg.problems[trialNum - 1].firstWord + " "
 						//	+ cfg.problems[trialNum - 1].secondWord + " "
 						//	+ cfg.problems[trialNum - 1].thirdWord
 						//	, WIDTH / 2, HEIGHT / 2);
-                        //
-						//response.word1 = cfg.problems[trialNum - 1].firstWord;
-						//response.word2 = cfg.problems[trialNum - 1].secondWord;
-						//response.word3 = cfg.problems[trialNum - 1].thirdWord;
+
+						response.word1 = cfg.problems[trialNum - 1].firstWord;
+						response.word2 = cfg.problems[trialNum - 1].secondWord;
+						response.word3 = cfg.problems[trialNum - 1].thirdWord;
 					}
 					else { //AMComeback
 						ctx.fillText(cfg.practice[practiceNum - 1].firstWord + " "
@@ -364,7 +380,7 @@ function start_CRA_experiment(cfg) {
 
 				onsolution: function (event, from, to) {
 					ctx.clearRect(0, 0, WIDTH, HEIGHT);
-					ctx.fillText("Solution?", WIDTH / 2, HEIGHT / 2);
+					ctx.fillText("Solution?", WIDTH / 2, (HEIGHT / 2) - 20);
 
 					var timeout = setTimeout(function () {
 						console.log("Solution Timeout");
@@ -520,8 +536,7 @@ function start_CRA_experiment(cfg) {
 
 				onpracticeInstructions: function (event, from, to) {
 					ctx.clearRect(0, 0, WIDTH, HEIGHT);
-					ctx.fillText("You will now begin the real experiment, press the spacebar to continue",
-						WIDTH / 2, HEIGHT / 2);
+					message(["You will now begin the real experiment", "press the spacebar to continue"]);
 
 					realProblem = 2;
 
