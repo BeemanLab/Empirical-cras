@@ -116,39 +116,14 @@ function start_CRA_experiment(cfg) {
 
 		window.onbeforeunload = warn_termination;
 		function warn_termination() {
-			//AMR
-			// WHEN CFG FILE IS READY UNCOMMENT THIS
-			////////
-			// if (cfg["errorHandle"].upload == 0) {
-			// 	console.log("cfg['errorHandle'].upload", cfg["errorHandle"].upload);
-			// 	console.log("not uploading");
-			// 	console.log(response_log);
-			// }
-			// else {
-			// 	ServerHelper.upload_data('nav away. block:' + blockNum + ', trial:' + trialNum, response_log);
-			// 	var status_info_unload = ['trial' + trialNum, 'date:' + new Date().toString()];
-			// 	ServerHelper.upload_data('status', status_info_unload);
-			// 	return 'navigation message'
-			// }
-
-			window.onbeforeunload = warn_termination;
-			function warn_termination() {
-				//AMR
-				// WHEN CFG FILE IS READY UNCOMMENT THIS
-				////////
-				// if (cfg["errorHandle"].upload == 0) {
-				// 	console.log("cfg['errorHandle'].upload", cfg["errorHandle"].upload);
-				// 	console.log("not uploading");
-				// 	console.log(response_log);
-				// }
-				// else {
-				// 	ServerHelper.upload_data('nav away. block:' + blockNum + ', trial:' + trialNum, response_log);
-				// 	var status_info_unload = ['trial' + trialNum, 'date:' + new Date().toString()];
-				// 	ServerHelper.upload_data('status', status_info_unload);
-				// 	return 'navigation message'
-				// }
-			}
+				console.log('problem');
+				alert('dont leave me');
+				ServerHelper.upload_data('nav away. block:' + blockNum + ', trial:' + trialNum, response_log);
+				var status_info_unload = ['trial' + trialNum, 'date:' + new Date().toString()];
+				ServerHelper.upload_data('status', status_info_unload);
+				return 'navigation message';
 		}
+
 
 		function show_picture (image_name) {
 			var x = WIDTH/2.0 - imagesOfImages[image_name].width/2.0;
@@ -550,11 +525,12 @@ function start_CRA_experiment(cfg) {
 
 				onend: function (event, from, to) {
 					//send response_log to the server
-					//if (cfg.specs.upload == 0) {		//AMR
-					//	console.log('serverhelper', ServerHelper.upload_data('complete'));
-					//	// ServerHelper.upload_data('partial block: ' + blockNum + ', trial: ' + trialNum, response_log);
-					//	// ServerHelper.upload_data('status', status_info );
-					//}
+					console.log('in onend');
+					if (cfg.specs.upload === 0) {		//AMR
+						console.log('res', response_log);
+						ServerHelper.upload_data('complete', response_log);
+						//ServerHelper.upload_data('status', status_info );
+					}
 
 					//ServerHelper.upload_to_mturk(LIVE_MTURK, summary); //AMR
 					//console.log('summary: ', summary); //AMR

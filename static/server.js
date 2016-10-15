@@ -136,16 +136,20 @@ var ServerHelper = {
                 var response = ServerHelper.xmlhttp.responseText;
                 parser = new DOMParser();
                 xmlDoc = parser.parseFromString(response,"text/xml");
-                console.log("text: "+response.slice(0,200));
+                if(server_debug) {
+                    console.log("text: " + response.slice(0, 200));
+                }
                 // the response is an XML object with the session token, workerid,  config file and consent form
                 ServerHelper.sessionToken = xmlDoc.getElementsByTagNameNS("https://www.reberlab.org/","session")[0].childNodes[0].nodeValue;
                 console.log("session "+ ServerHelper.sessionToken);
                 ServerHelper.workerId = xmlDoc.getElementsByTagNameNS("https://www.reberlab.org/","workerid")[0].childNodes[0].nodeValue;
                 ServerHelper.config_file = xmlDoc.getElementsByTagNameNS("https://www.reberlab.org/","config")[0].childNodes[0].nodeValue;
                 ServerHelper.consent_form = xmlDoc.getElementsByTagNameNS("https://www.reberlab.org/","consent")[0].childNodes[0].nodeValue;
-                console.log("session "+ ServerHelper.sessionToken);
-                console.log("worker "+ServerHelper.workerId);
-                console.log("config "+ServerHelper.config_file.slice(0,200));
+                if(server_debug) {
+                    console.log("session " + ServerHelper.sessionToken);
+                    console.log("worker " + ServerHelper.workerId);
+                    console.log("config " + ServerHelper.config_file.slice(0, 200));
+                }
                 // what happens if anything isn't parse properly?
             } else {
                 ServerHelper.fatal_error=true;
